@@ -22,7 +22,7 @@ export default function HomeScreen() {
 
         <ThemedView style={styles.row}>
           <ThemedText style={styles.labelText}>Student Name: </ThemedText>
-          <ThemedText style={styles.bodyText}>Cesario G. Am-is Jr.</ThemedText>
+          <ThemedText style={styles.bodyText}>Am-is, Cesario G. Jr.</ThemedText>
         </ThemedView>
 
         <ThemedView style={styles.row}>
