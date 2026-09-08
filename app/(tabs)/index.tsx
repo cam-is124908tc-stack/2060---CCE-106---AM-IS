@@ -1,88 +1,113 @@
-import { Image, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+interface CounterProps {
+  step?: number;
+}
 
-export default function HomeScreen() {
+export default function CounterApp({ step = 1 }: CounterProps) {
+  const [count, setCount] = useState<number>(0);
+
+  const handleIncrease = () => {
+    setCount(prev => prev + step);
+  };
+
+  const handleDecrease = () => {
+    setCount(prev => (prev - step < 0 ? 0 : prev - step));
+  };
+
+  const handleReset = () => {
+    setCount(0);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#0F172A', dark: '#0F172A' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      
-      <ThemedView style={styles.cardContainer}>
-        <ThemedText style={styles.titleText}>
-          App Title: EventPulse
-        </ThemedText>
+    <View style={styles.container}>
+      <Text style={styles.title}>Guided Mini Project: Counter App</Text>
+      <Text style={styles.subtitle}>
+        A simple app that proves students understand state and events.
+      </Text>
 
-        <ThemedView style={styles.row}>
-          <ThemedText style={styles.labelText}>Student Name: </ThemedText>
-          <ThemedText style={styles.bodyText}>Am-is, Cesario G. Jr.</ThemedText>
-        </ThemedView>
+      <View style={styles.displayBox}>
+        <Text style={styles.countText}>{count}</Text>
+      </View>
 
-        <ThemedView style={styles.row}>
-          <ThemedText style={styles.labelText}>Course/Section: </ThemedText>
-          <ThemedText style={styles.bodyText}>BSIT - 2063 - CEE 106</ThemedText>
-        </ThemedView>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={[styles.button, styles.increaseBtn]} onPress={handleIncrease}>
+          <Text style={styles.buttonText}>Increase</Text>
+        </TouchableOpacity>
 
-        <ThemedView style={styles.section}>
-          <ThemedText style={styles.labelText}>App Idea:</ThemedText>
-          <ThemedText style={styles.bodyText}>
-            A campus event tracker app that aggregates all student organization activities, tech seminars, and university workshops with real-time notifications.
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
+        <TouchableOpacity style={[styles.button, styles.decreaseBtn]} onPress={handleDecrease}>
+          <Text style={styles.buttonText}>Decrease</Text>
+        </TouchableOpacity>
 
-    </ParallaxScrollView>
+        <TouchableOpacity style={[styles.button, styles.resetBtn]} onPress={handleReset}>
+          <Text style={styles.buttonText}>Reset</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: '#0F172A',
-    padding: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+  container: {
+    flex: 1,
+    backgroundColor: '#1e293b',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
   },
-  titleText: {
+  title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    color: '#ffffff',
+    marginBottom: 5,
+    textAlign: 'center',
   },
-  labelText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
+  subtitle: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginBottom: 30,
+    textAlign: 'center',
   },
-  bodyText: {
-    fontSize: 15,
-    color: '#CBD5E1',
-  },
-  row: {
-    flexDirection: 'row',
+  displayBox: {
+    width: 220,
+    height: 140,
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: '#334155',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
-    backgroundColor: 'transparent',
+    borderRadius: 8,
+    marginBottom: 30,
   },
-  section: {
-    gap: 4,
-    marginBottom: 8,
-    backgroundColor: 'transparent',
+  countText: {
+    fontSize: 64,
+    fontWeight: 'bold',
+    color: '#ffffff',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    minWidth: 85,
+    alignItems: 'center',
+  },
+  increaseBtn: {
+    backgroundColor: '#86efac',
+  },
+  decreaseBtn: {
+    backgroundColor: '#fde047',
+  },
+  resetBtn: {
+    backgroundColor: '#93c5fd',
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
   },
 });
