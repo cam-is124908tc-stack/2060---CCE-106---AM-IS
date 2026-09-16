@@ -1,196 +1,107 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Stack, useRouter } from 'expo-router';
-import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { colors } from '../theme';
-
-const STUDENT = {
-  id: '124908',
-  name: 'Cesario G. Am-is Jr.',
-  email: 'c.am-is.124908.tc@umindanao.edu.ph',
-  program: 'Information Technology',
-  year: '3rd Year',
-  status: 'Regular Student',
-  semester: '1st Semester, AY 2026-2027',
-  units: '18 Units',
-};
+import React, { useState } from 'react';
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function ProfileScreen() {
-  const router = useRouter();
+  const [fullName, setFullName] = useState('Student Name');
+  const [email, setEmail] = useState('student@campus.edu');
+
+  const [savedName, setSavedName] = useState('Student Name');
+  const [savedEmail, setSavedEmail] = useState('student@campus.edu');
+
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleSave = () => {
+    setErrorMessage('');
+    setShowSuccess(false);
+
+    if (!fullName.trim() || !email.trim()) {
+      setErrorMessage('Full Name and Email are required.');
+      return;
+    }
+
+    if (!email.includes('@') || email.indexOf('@') === email.length - 1) {
+      setErrorMessage('Please enter a valid email structure.');
+      return;
+    }
+
+    setSavedName(fullName);
+    setSavedEmail(email);
+    setShowSuccess(true);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.headerTitle}>User Profile</Text>
 
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.greetingText}>STUDENT PROFILE</Text>
-
-        <View style={styles.heroCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>CA</Text>
-          </View>
-          <View style={styles.profileTextContainer}>
-            <Text style={styles.studentName}>{STUDENT.name}</Text>
-            <Text style={styles.studentEmail}>{STUDENT.email}</Text>
-          </View>
+        <View style={styles.profileCard}>
+          <View style={styles.avatarPlaceholder} />
+          <Text style={styles.savedName}>{savedName}</Text>
+          <Text style={styles.savedEmail}>{savedEmail}</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Academic Details & Record</Text>
-        <View style={styles.glassForm}>
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Student ID</Text>
-            <Text style={styles.rowValue}>{STUDENT.id}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Program</Text>
-            <Text style={styles.rowValue}>{STUDENT.program}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Year Level</Text>
-            <Text style={styles.rowValue}>{STUDENT.year}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Academic Status</Text>
-            <Text style={styles.rowValue}>{STUDENT.status}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Current Semester</Text>
-            <Text style={styles.rowValue}>{STUDENT.semester}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Units Enrolled</Text>
-            <Text style={styles.rowValue}>{STUDENT.units}</Text>
-          </View>
-        </View>
+        <Text style={styles.formTitle}>Edit Details</Text>
+
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+        {showSuccess ? <Text style={styles.successText}>✓ Profile updated successfully!</Text> : null}
+
+        <Text style={styles.label}>Full Name *</Text>
+        <TextInput
+          style={styles.input}
+          value={fullName}
+          onChangeText={setFullName}
+          placeholder="Enter full name"
+          placeholderTextColor="#64748B"
+        />
+
+        <Text style={styles.label}>Email Address *</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Enter email"
+          placeholderTextColor="#64748B"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <Pressable style={styles.saveBtn} onPress={handleSave}>
+          <Text style={styles.saveBtnText}>Save Profile</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  headerTitle: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  greetingText: {
-    color: colors.primary,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-    marginBottom: 12,
-  },
-  heroCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: 18,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: '#E6F7ED',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    color: colors.primary,
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  profileTextContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  studentName: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  studentEmail: {
-    color: colors.textMuted,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 12,
-    letterSpacing: 0.5,
-  },
-  glassForm: {
-    backgroundColor: colors.card,
+  container: { flex: 1, backgroundColor: '#0F172A' },
+  content: { padding: 24, paddingTop: 40 },
+  headerTitle: { color: '#F8FAFC', fontSize: 24, fontWeight: '900', marginBottom: 20 },
+  profileCard: {
+    backgroundColor: '#1E293B',
     borderRadius: 20,
-    paddingHorizontal: 16,
+    padding: 20,
+    alignItems: 'center',
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#334155',
   },
-  row: {
-    paddingVertical: 14,
+  avatarPlaceholder: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#312E81', marginBottom: 12 },
+  savedName: { color: '#F8FAFC', fontSize: 18, fontWeight: '800' },
+  savedEmail: { color: '#94A3B8', fontSize: 13 },
+  formTitle: { color: '#F8FAFC', fontSize: 16, fontWeight: '800', marginBottom: 12 },
+  label: { color: '#94A3B8', fontSize: 12, fontWeight: '700', marginBottom: 6, marginTop: 10 },
+  input: {
+    backgroundColor: '#1E293B',
+    borderRadius: 12,
+    padding: 14,
+    color: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#334155',
   },
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  rowLabel: {
-    color: colors.textMuted,
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  rowValue: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-    marginTop: 4,
-  },
+  saveBtn: { backgroundColor: '#6366F1', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 24 },
+  saveBtnText: { color: '#FFFFFF', fontWeight: '800' },
+  errorText: { color: '#F43F5E', backgroundColor: '#881337', padding: 10, borderRadius: 8, marginBottom: 10 },
+  successText: { color: '#34D399', backgroundColor: '#064E3B', padding: 10, borderRadius: 8, marginBottom: 10 },
 });
