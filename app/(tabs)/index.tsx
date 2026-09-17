@@ -32,6 +32,10 @@ export default function HomeScreen() {
         <Pressable style={styles.secondaryBtn} onPress={() => router.push('/(tabs)/profile')}>
           <Text style={styles.secondaryBtnText}>View Profile (Router Push)</Text>
         </Pressable>
+
+        <Pressable style={styles.secondaryBtn} onPress={() => router.push('/(tabs)/lab08')}>
+          <Text style={styles.secondaryBtnText}>Open Attendance List</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
