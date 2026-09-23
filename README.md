@@ -48,3 +48,23 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Test the Quotes API with Postman
+
+1. Open Postman and choose **Import**.
+2. Select `postman/Quotes-App.postman_collection.json` from this project.
+3. Open the imported **Quotes App API** collection and send **Get a random quote**.
+4. A successful response is HTTP `200` and includes `quote` and `author` fields. The collection also checks these fields in its Tests tab.
+
+The Expo app uses this same `GET https://dummyjson.com/quotes/random` endpoint when it loads and when **NEW QUOTE** is pressed.
+
+## Connect the Student Portal API
+
+The portal includes login, persistent token storage, session restore, a protected profile request, role display, and logout. It runs with a local demo account when no backend URL is set. To use a real backend:
+
+1. Copy `.env.example` to `.env` and set `EXPO_PUBLIC_API_URL` to a URL reachable from your phone or emulator. Restart Expo after changing environment variables.
+2. Import `postman/Student-Portal-API.postman_collection.json` into Postman. Set the collection variables `baseUrl`, `studentEmail`, and `studentPassword` to your API URL and test account.
+3. Send **Login**, then **Get protected profile**. Login must accept `POST /auth/login` with `{ "email": "...", "password": "..." }` and return a token field. Profile must accept `GET /auth/me` with `Authorization: Bearer <token>` and return a profile/user object containing at least a name or email. Optional profile fields are `studentId`, `program`, `yearLevel`, and `role`.
+4. If your backend uses different routes, set `EXPO_PUBLIC_LOGIN_PATH` and `EXPO_PUBLIC_PROFILE_PATH` in `.env`. The grades screen also uses `EXPO_PUBLIC_GRADES_PATH` (default `/grades`).
+
+The sample collection documents the contract the app currently expects; it does not create or host a student backend. Use credentials issued by your backend. The demo credentials shown in the app work only in demo mode.

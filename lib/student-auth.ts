@@ -70,6 +70,10 @@ async function readResponse(response: Response) {
   return body;
 }
 
+export function isUnauthorizedError(error: unknown) {
+  return error instanceof Error && /\b(401|403)\b|unauthorized|forbidden/i.test(error.message);
+}
+
 function findToken(body: any): string | undefined {
   return body?.token ?? body?.access_token ?? body?.accessToken ??
     body?.data?.token ?? body?.data?.access_token ?? body?.data?.accessToken;

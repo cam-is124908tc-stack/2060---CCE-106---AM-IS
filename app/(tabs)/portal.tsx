@@ -20,6 +20,7 @@ import {
   fetchStudentProfile,
   getSavedToken,
   isDemoMode,
+  isUnauthorizedError,
   login,
   StudentProfile,
 } from '../../lib/student-auth';
@@ -35,18 +36,27 @@ export default function StudentPortalScreen() {
   const [restoring, setRestoring] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [restoreError, setRestoreError] = useState('');
+  const normalizedRole = profile?.role?.trim().toLowerCase();
+  const canViewGrades = !normalizedRole || ['student', 'learner'].includes(normalizedRole);
 
   const restoreSession = useCallback(async () => {
+    setRestoring(true);
+    setRestoreError('');
     try {
       const savedToken = await getSavedToken();
       if (!savedToken) return;
       setToken(savedToken);
       const student = await fetchStudentProfile(savedToken);
       setProfile(student);
-    } catch {
-      await clearSavedToken();
-      setToken(null);
-      setProfile(null);
+    } catch (restoreFailure) {
+      if (isUnauthorizedError(restoreFailure)) {
+        await clearSavedToken();
+        setToken(null);
+        setProfile(null);
+      } else {
+        setRestoreError(restoreFailure instanceof Error ? restoreFailure.message : 'Could not restore your session. Check your connection and retry.');
+      }
     } finally {
       setRestoring(false);
     }
@@ -109,6 +119,19 @@ export default function StudentPortalScreen() {
               <ActivityIndicator color={C.cyan} size="large" />
               <Text style={styles.loadingText}>Restoring your session…</Text>
             </View>
+          ) : restoreError ? (
+            <View style={styles.card}>
+              <View style={styles.errorBox}>
+                <Ionicons name="alert-circle-outline" size={18} color={C.danger} />
+                <Text style={styles.errorText}>{restoreError}</Text>
+              </View>
+              <TouchableOpacity style={styles.loginButton} onPress={() => void restoreSession()} activeOpacity={0.82}>
+                <Text style={styles.loginButtonText}>RETRY SESSION</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.logoutButton} onPress={() => void handleLogout()} activeOpacity={0.8}>
+                <Text style={styles.logoutText}>Sign out</Text>
+              </TouchableOpacity>
+            </View>
           ) : profile && token ? (
             <View style={styles.profileCard}>
               <View style={styles.profileTop}>
@@ -121,7 +144,10 @@ export default function StudentPortalScreen() {
               </View>
               <View style={styles.protectedBadge}>
                 <Ionicons name="shield-checkmark" size={16} color="#11825D" />
-                <Text style={styles.protectedText}>{isDemoMode ? 'Demo protected session active' : 'Protected session active'}</Text>
+                <Text style={styles.protectedText}>
+                  {isDemoMode ? 'Demo protected session active' : 'Protected session active'}
+                  {profile.role ? ` · ${profile.role}` : ''}
+                </Text>
               </View>
               <Text style={styles.sectionLabel}>ACADEMIC PROFILE</Text>
               <View style={styles.details}>
@@ -129,11 +155,13 @@ export default function StudentPortalScreen() {
                 <ProfileRow icon="school-outline" label="Program" value={profile.program} />
                 <ProfileRow icon="layers-outline" label="Year level" value={profile.yearLevel} />
               </View>
-              <TouchableOpacity style={styles.gradesButton} onPress={() => router.push('/grades')} activeOpacity={0.82}>
-                <Ionicons name="document-text-outline" size={19} color={C.blue} />
-                <Text style={styles.gradesButtonText}>View grades</Text>
-                <Ionicons name="chevron-forward" size={18} color={C.muted} />
-              </TouchableOpacity>
+              {canViewGrades && (
+                <TouchableOpacity style={styles.gradesButton} onPress={() => router.push('/grades')} activeOpacity={0.82}>
+                  <Ionicons name="document-text-outline" size={19} color={C.blue} />
+                  <Text style={styles.gradesButtonText}>View grades</Text>
+                  <Ionicons name="chevron-forward" size={18} color={C.muted} />
+                </TouchableOpacity>
+              )}
               <TouchableOpacity style={styles.logoutButton} onPress={() => void handleLogout()} disabled={loading} activeOpacity={0.8}>
                 <Ionicons name="log-out-outline" size={19} color={C.navy} />
                 <Text style={styles.logoutText}>Log out</Text>

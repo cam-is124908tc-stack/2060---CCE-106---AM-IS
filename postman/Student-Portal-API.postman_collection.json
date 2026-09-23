@@ -1,0 +1,70 @@
+{
+  "info": {
+    "_postman_id": "b87317cb-9f8e-48e7-9c76-0a3210e9ac67",
+    "name": "Student Portal API",
+    "description": "Example login and protected profile requests matching lib/student-auth.ts. Set baseUrl and credentials in a Postman environment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://your-api.example.com" },
+    { "key": "studentEmail", "value": "" },
+    { "key": "studentPassword", "value": "" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Login",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Login succeeds', function () { pm.response.to.have.status(200); });",
+            "const body = pm.response.json();",
+            "const token = body.token || body.access_token || body.accessToken || body.data?.token || body.data?.access_token || body.data?.accessToken;",
+            "pm.test('Response contains an access token', function () { pm.expect(token, 'token field').to.be.a('string').and.not.empty; });",
+            "if (token) pm.collectionVariables.set('accessToken', token);"
+          ]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/auth/login",
+        "description": "Expected request: POST /auth/login with JSON { email, password }. Expected response: { token } (also supports access_token/accessToken and nested data variants)."
+      }
+    },
+    {
+      "name": "Get protected profile",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Protected profile request succeeds', function () { pm.response.to.have.status(200); });",
+            "const body = pm.response.json();",
+            "const profile = body.profile || body.user || body.data?.profile || body.data?.user || body.data || body;",
+            "pm.test('Profile contains a name or email', function () { pm.expect(profile.name || profile.fullName || profile.full_name || profile.email).to.be.ok; });"
+          ]
+        }
+      }],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{baseUrl}}/auth/me",
+        "description": "Expected request: GET /auth/me with Authorization: Bearer <token>. Profile response can contain name/fullName, email, studentId, program, yearLevel, and role."
+      }
+    }
+  ]
+}
