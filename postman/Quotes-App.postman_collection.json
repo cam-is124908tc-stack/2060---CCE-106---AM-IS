@@ -1,0 +1,38 @@
+{
+  "info": {
+    "_postman_id": "6d46e1ce-5196-4b3c-9c10-5cf8a4b52104",
+    "name": "Quotes App API",
+    "description": "Postman request for the same random quote API used by the Expo app.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get a random quote",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "https://dummyjson.com/quotes/random",
+          "protocol": "https",
+          "host": ["dummyjson", "com"],
+          "path": ["quotes", "random"]
+        },
+        "description": "Returns one quote with its author. The app calls this endpoint when it opens and when NEW QUOTE is pressed."
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('Response contains a quote and author', function () {",
+            "    const body = pm.response.json();",
+            "    pm.expect(body.quote).to.be.a('string').and.not.empty;",
+            "    pm.expect(body.author).to.be.a('string').and.not.empty;",
+            "});"
+          ]
+        }
+      }]
+    }
+  ]
+}

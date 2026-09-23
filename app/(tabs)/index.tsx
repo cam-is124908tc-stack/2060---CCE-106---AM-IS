@@ -17,6 +17,7 @@ const FALLBACK_QUOTE: Quote = {
   quote: 'The secret of getting ahead is getting started.',
   author: 'Mark Twain',
 };
+const QUOTE_REQUEST_TIMEOUT_MS = 10000;
 
 export default function QuotesScreen() {
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -26,15 +27,27 @@ export default function QuotesScreen() {
   const fetchQuote = useCallback(async () => {
     setLoading(true);
     setError(false);
+    const controller = new AbortController();
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     try {
-      const response = await fetch('https://dummyjson.com/quotes/random');
-      if (!response.ok) throw new Error(`Quote request failed (${response.status})`);
-      const data: Quote = await response.json();
+      const request = async () => {
+        const response = await fetch('https://dummyjson.com/quotes/random', { signal: controller.signal });
+        if (!response.ok) throw new Error(`Quote request failed (${response.status})`);
+        return response.json() as Promise<Quote>;
+      };
+      const timeout = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          controller.abort();
+          reject(new Error('Quote request timed out'));
+        }, QUOTE_REQUEST_TIMEOUT_MS);
+      });
+      const data = await Promise.race([request(), timeout]);
       if (!data?.quote || !data?.author) throw new Error('Invalid quote response');
       setQuote({ quote: data.quote, author: data.author });
     } catch {
       setError(true);
     } finally {
+      if (timeoutId) clearTimeout(timeoutId);
       setLoading(false);
     }
   }, []);
@@ -66,7 +79,9 @@ export default function QuotesScreen() {
               <View style={styles.quoteBody}>
                 {error && (
                   <Text style={styles.errorText}>
-                    {quote ? 'Could not refresh the quote. Showing the last one.' : 'Could not get a quote. Showing a sample instead.'}
+                    {quote
+                      ? 'Could not refresh the quote. Showing the last one. Check your connection and try again.'
+                      : 'Could not reach the quote API. Showing a sample instead. Check your connection and try again.'}
                   </Text>
                 )}
                 <Text style={styles.quoteMark}>“</Text>
@@ -91,7 +106,12 @@ export default function QuotesScreen() {
             accessibilityRole="button"
             accessibilityLabel={error ? 'Try loading another quote' : 'Get a new quote'}
           >
-            {loading ? <ActivityIndicator size="small" color="#FFFFFF" /> : (
+            {loading ? (
+              <>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+                <Text style={styles.buttonText}>LOADING...</Text>
+              </>
+            ) : (
               <>
                 <Ionicons name="shuffle-outline" size={19} color="#FFFFFF" />
                 <Text style={styles.buttonText}>{error ? 'TRY AGAIN' : 'NEW QUOTE'}</Text>
