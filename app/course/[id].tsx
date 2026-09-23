@@ -8,6 +8,13 @@ const COURSE_DATA: Record<
   string,
   { title: string; instructor: string; schedule: string; room: string; units: string }
 > = {
+  '2063': {
+    title: 'Application Development and Emerging Technologies',
+    instructor: 'Course instructor',
+    schedule: 'Monday - Saturday · 10:00 AM - 12:00 PM',
+    room: 'See class schedule',
+    units: '3',
+  },
   CCE106: {
     title: 'Mobile Application Development',
     instructor: 'Prof. J. Santos',

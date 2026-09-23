@@ -40,6 +40,7 @@ export default function RootLayout() {
           presentation: 'card',
         }}
       />
+      <Stack.Screen name="grades" options={{ title: 'Grades' }} />
     </Stack>
   );
 }
