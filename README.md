@@ -1,50 +1,38 @@
-# Welcome to your Expo app 👋
+# Secure Profile App Lab
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native app for practicing API authentication and secure token handling with Expo SDK 57.
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run the app
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Open it in Expo Go on Android or iOS. The app uses the native `expo-secure-store` module for token persistence, so web is only a preview: its token stays in memory and is cleared when the page reloads.
 
-## Learn more
+## Practice login
 
-To learn more about developing your project with Expo, look at the following resources:
+DummyJSON publishes these test credentials:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Username: `emilys`
+- Password: `emilyspass`
 
-## Join the community
+The app sends them to `POST https://dummyjson.com/auth/login`, stores the returned access token with SecureStore, then loads the profile from `GET https://dummyjson.com/auth/me` with an `Authorization: Bearer` header. On app start it checks SecureStore and restores the profile; logout deletes the stored token.
 
-Join our community of developers creating universal apps.
+## Use the API in Postman
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The app calls DummyJSON directly. To send and inspect the same API requests in Postman, import both files from `postman/` using **Import** in your Postman workspace:
+
+- `Secure Profile App.postman_collection.json`
+- `Secure Profile App.postman_environment.json`
+
+Select the **Secure Profile App Lab - DummyJSON** environment, then run the collection in order. The valid login request saves its access token as an environment variable; the next request uses it as a Bearer token for `/auth/me`. The last request checks that a wrong password is rejected. Postman supports importing collection and environment JSON files, and its scripts can set environment variables for subsequent requests ([import guide](https://learning.postman.com/docs/getting-started/importing-and-exporting/importing-data), [environment variables](https://learning.postman.com/docs/use/send-requests/variables/environment-variables)).
+
+These are public test credentials for a practice API. Do not enter a personal password. This demo does not implement production authentication or a real user database.
+
+## Project files
+
+- `src/app/index.tsx` — login and authenticated profile interface, loading and error states, session restore, logout.
+- `src/services/authService.ts` — login and protected profile API requests.
+- `src/storage/tokenStorage.ts` — SecureStore token save, read, and delete methods.

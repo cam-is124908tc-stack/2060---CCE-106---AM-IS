@@ -1,0 +1,96 @@
+{
+  "info": {
+    "_postman_id": "8dd58c80-b725-4e1c-93b2-f44c6a2a0106",
+    "name": "Secure Profile App Lab",
+    "description": "Practice and verify the DummyJSON login and protected profile calls used by the CCE106 Secure Profile app. The login credentials are public test data only.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login (valid credentials)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"expiresInMins\": 30\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/auth/login",
+        "description": "Sends the practice credentials and saves the access token to the active Postman environment for the protected request."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login succeeds', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('Response includes a user and access token', function () {",
+              "  pm.expect(body).to.have.property('accessToken').that.is.a('string').and.not.empty;",
+              "  pm.expect(body).to.have.property('username', pm.environment.get('username'));",
+              "});",
+              "if (body.accessToken) pm.environment.set('accessToken', body.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Get current user (Bearer token)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}", "type": "text" }],
+        "url": "{{baseUrl}}/auth/me",
+        "description": "Sends the saved access token in the Authorization: Bearer header. Run after the valid login request."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Protected profile request succeeds', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('Profile has the required fields', function () {",
+              "  pm.expect(body).to.have.property('firstName');",
+              "  pm.expect(body).to.have.property('lastName');",
+              "  pm.expect(body).to.have.property('username');",
+              "  pm.expect(body).to.have.property('email');",
+              "  pm.expect(body).to.have.property('image');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Login (invalid password)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"definitely-not-the-password\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/auth/login",
+        "description": "Confirms that an incorrect password is rejected. This request does not print or save any token."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Invalid password is rejected', function () { pm.expect(pm.response.code).to.be.oneOf([400, 401]); });",
+              "const body = pm.response.json();",
+              "pm.test('Failure response contains a readable message', function () { pm.expect(body).to.have.property('message').that.is.a('string').and.not.empty; });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
